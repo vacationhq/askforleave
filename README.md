@@ -1,0 +1,3 @@
+# AskForLeave
+
+AskForLeave is a simple vacation tool created by Google Form + Google Spreadsheet + Google Apps Script + Slack + ...
