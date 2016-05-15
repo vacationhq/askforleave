@@ -9,7 +9,8 @@ AskForLeave is a simple vacation tool for small startups. It is done by Google F
 ## INSTALL
 
 * Copy the sample spreadsheet: https://docs.google.com/spreadsheets/d/1278CFK8m2w6NY4JN9T4GfSPsVxlGi1P4W2Ndo6cQlC8/edit?usp=sharing
-* Create a form like this: http://goo.gl/forms/PPZLpVOdHP
+* Create a form like this: http://goo.gl/forms/PPZLpVOdHP , screenshot: https://www.dropbox.com/s/gbwv3rhumiirzuk/google-form-setting.png?dl=0
+
 * If you need Google Calendar integration:
 * If you need Slack integration: 
 
