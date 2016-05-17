@@ -20,9 +20,13 @@ AskForLeave is a simple vacation tool for small startups. It is done by Google F
 
 ## Contributing
 
-* Mosky
 * Aki Chiu
+* Even Wu for the logo of [dayoff bot](https://github.com/vacationhq/hubot-dayoff)
 * Liang-Bin Hsueh
+* Mosky
+* Paris Tsai
+* Vikky Huang for the logo of [VacationHQ](https://github.com/vacationhq) organization
+* Yuren Ju
 
 ## Licensing
 
