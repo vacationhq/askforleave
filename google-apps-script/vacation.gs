@@ -1,5 +1,6 @@
 var vacationDataParser = function(data, row) {
   var vacation = {
+    row:        row,
     timestamp:  data.getRange(row, 1).getValue(),
     user:       data.getRange(row, 2).getValue(),
     type:       data.getRange(row, 3).getValue(),
@@ -109,14 +110,23 @@ function vacation() {
   var sheetName = 'data';
   var calendarID = '';
   var slackURL = '';
-  var slackChannel = '#random';
+  var slackChannel = '#general';
 
   var data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
 
   var lastRow = data.getLastRow();
-  var vacation = vacationDataParser(data, lastRow);
-  if (vacation) {
-    addEventToCalendar(calendarID, vacation);
-    sendEventToSlack(slackURL, slackChannel, vacation);
+
+  for (var row = lastRow; row >= 2; row--) {
+    var vacation = vacationDataParser(data, row);
+    if (vacation && vacation.dirtyFlag != true) {
+      addEventToCalendar(calendarID, vacation);
+      sendEventToSlack(slackURL, slackChannel, vacation);
+      data.getRange(vacation.row, 6).setValue(true);
+      Logger.log("Trigger vacation by " + vacation.user + " in row " + vacation.row);
+    }
+    else {
+      Logger.log("Done");
+      break;
+    }
   }
 }
