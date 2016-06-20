@@ -1,55 +1,60 @@
-function vacation() {
-  /*
-   * trigger when someone submits the form
-   * 1. add an event to calendar
-   * 2. send a message to slack
-   */
+var vacationDataParser = function(data, row) {
+  var vacation = {
+    timestamp:  data.getRange(row, 1).getValue(),
+    user:       data.getRange(row, 2).getValue(),
+    type:       data.getRange(row, 3).getValue(),
+    beginDate:  data.getRange(row, 4).getValue(),
+    days:       data.getRange(row, 5).getValue(),
+    dirtyFlag:  data.getRange(row, 6).getValue(),
+    endDate:    "",
+    Date:       ""
+  };
+  if (typeof vacation.days !== "number") {
+    return None;
+  }
 
-  // the sheet for form data is called "data"
-  var sheetName = 'data';
-  var calendarID = '';
-  var slackURL = '';
-  var slackChannel = '#general';
+  if (vacation.days <= 0) {
+    return None;
+  }
 
-  var data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+  if (vacation.days <= 1) {
+    vacation.Date = Utilities.formatDate(vacation.beginDate, 'GMT+8', 'yyyy-MM-dd');
+  }
+  else {
+    vacation.endDate = new Date(new Date(vacation.beginDate).getTime() + Math.ceil(vacation.days) * (24*3600*1000));
+    vacation.Date = Utilities.formatDate(vacation.beginDate, 'GMT+8', 'yyyy-MM-dd') + " - " + Utilities.formatDate(vacation.endDate, 'GMT+8', 'yyyy-MM-dd');
+  }
+
+  return vacation;
+}
+
+var addEventToCalendar = function(calendarID, vacation) {
+  if (calendarID == '') {
+    return;
+  }
   var calendar = CalendarApp.getCalendarById(calendarID);
 
-  // get data
-  var lastRow = data.getLastRow();
-  var user = data.getRange(lastRow, 2).getValue();
-  var vacationType = data.getRange(lastRow, 3).getValue();
-  var beginDate = data.getRange(lastRow, 4).getValue();
-  var days = data.getRange(lastRow, 5).getValue();
-  var vacationDate;
-
-  if (typeof days !== "number") {
-    return false;
+  if (vacation.days <= 1) {
+    calendar.createAllDayEvent(vacation.user + " " + vacation.type, vacation.beginDate);
   }
-
-  if (days <= 0) {
-    return false;
-  }
-
-  if (days <= 1) {
-    // send to google calendar
-    calendar.createAllDayEvent(user + " " + vacationType, beginDate);
-    vacationDate = Utilities.formatDate(beginDate, 'GMT+8', 'yyyy-MM-dd');
-  } else {
-    // use hack from https://code.google.com/p/google-apps-script-issues/issues/detail?id=952 #13 and #18
-    // use calendar api: enable it in developer console first
-    var endDate = new Date(new Date(beginDate).getTime() + Math.ceil(days) * (24*3600*1000));
-    vacationDate = Utilities.formatDate(beginDate, 'GMT+8', 'yyyy-MM-dd') + " - " + Utilities.formatDate(endDate, 'GMT+8', 'yyyy-MM-dd');
+  else {
     var event = {
-      summary: user + " " + vacationType,
+      summary: vacation.user + " " + vacation.type,
       start: {
-        date: Utilities.formatDate(beginDate, 'GMT+8', 'yyyy-MM-dd')
+        date: Utilities.formatDate(vacation.beginDate, 'GMT+8', 'yyyy-MM-dd')
       },
       end: {
-        date: Utilities.formatDate(endDate, 'GMT+8', 'yyyy-MM-dd')
+        date: Utilities.formatDate(vacation.endDate, 'GMT+8', 'yyyy-MM-dd')
       }
     };
 
     event = Calendar.Events.insert(event, calendarID);
+  }
+}
+
+var sendEventToSlack = function(slackURL, slackChannel, vacation) {
+  if (slackURL == '' || slackChannel == '') {
+    return;
   }
 
   // prepare slack message
@@ -67,17 +72,17 @@ function vacation() {
           "fields":[
              {
                 "title": "員工信箱 Employee Email",
-                "value": user,
+                "value": vacation.user,
                 "short": false
              },
              {
                 "title": "假別 Vacation Type",
-                "value": vacationType,
+                "value": vacation.type,
                 "short": false
              },
              {
                 "title": "日期 Vacation Date",
-               "value": vacationDate + " (" + days + (days <= 1 ? " day" : " days)"),
+               "value": vacation.Date + " (" + vacation.days + (vacation.days <= 1 ? " day" : " days)"),
                 "short": false
              }
           ]
@@ -91,5 +96,27 @@ function vacation() {
   };
 
   UrlFetchApp.fetch(slackURL, options);
+}
 
+function vacation() {
+  /*
+   * trigger when someone submits the form
+   * 1. add an event to calendar
+   * 2. send a message to slack
+   */
+
+  // the sheet for form data is called "data"
+  var sheetName = 'data';
+  var calendarID = '';
+  var slackURL = '';
+  var slackChannel = '#random';
+
+  var data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+
+  var lastRow = data.getLastRow();
+  var vacation = vacationDataParser(data, lastRow);
+  if (vacation) {
+    addEventToCalendar(calendarID, vacation);
+    sendEventToSlack(slackURL, slackChannel, vacation);
+  }
 }
