@@ -110,7 +110,7 @@ function vacation() {
   var sheetName = 'data';
   var calendarID = '';
   var slackURL = '';
-  var slackChannel = '#general';
+  var slackChannel = '#random';
 
   var data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
 
