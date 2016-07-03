@@ -10,15 +10,17 @@ var vacationDataParser = function(data, row) {
     endDate:    "",
     Date:       ""
   };
-  if (typeof vacation.days !== "number") {
-    return None;
+
+  var days = parseFloat(vacation.days);
+  if (isNaN(days)) {
+    return null;
   }
 
-  if (vacation.days <= 0) {
-    return None;
+  if (days <= 0) {
+    return null;
   }
 
-  if (vacation.days <= 1) {
+  if (days <= 1) {
     vacation.Date = Utilities.formatDate(vacation.beginDate, 'GMT+8', 'yyyy-MM-dd');
   }
   else {
