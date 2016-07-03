@@ -83,7 +83,7 @@ var sendEventToSlack = function(slackURL, slackChannel, vacation) {
              },
              {
                 "title": "日期 Vacation Date",
-               "value": vacation.Date + " (" + vacation.days + (vacation.days <= 1 ? " day" : " days)"),
+               "value": vacation.Date + " (" + vacation.days + (vacation.days <= 1 ? " day)" : " days)"),
                 "short": false
              }
           ]
