@@ -1,3 +1,8 @@
+var sheetName = ''; // the sheet which is linked to your form submission.
+var calendarID = '';
+var slackURL = '';
+var slackChannel = '';
+
 var vacationDataParser = function(data, row) {
   var vacation = {
     row:        row,
@@ -10,22 +15,42 @@ var vacationDataParser = function(data, row) {
     endDate:    "",
     Date:       ""
   };
-  if (typeof vacation.days !== "number") {
-    return None;
+
+  var days = parseFloat(vacation.days);
+  if (isNaN(days)) {
+    return null;
   }
 
-  if (vacation.days <= 0) {
-    return None;
+  if (days <= 0) {
+    return null;
+  }
+  var beginWeekday = vacation.beginDate;
+  if (beginWeekday == 0 || beginWeekday == 6) {
+    Logger.log("The begin date is not permitted")
   }
 
-  if (vacation.days <= 1) {
+  if (days <= 1) {
     vacation.Date = Utilities.formatDate(vacation.beginDate, 'GMT+8', 'yyyy-MM-dd');
   }
   else {
-    vacation.endDate = new Date(new Date(vacation.beginDate).getTime() + Math.ceil(vacation.days) * (24*3600*1000));
+    vacation.Dates = [];
+    var tmpDate = vacation.beginDate;
+    for (var i = days; i > 0; i--) {
+      if (tmpDate.getDay() == 0 || tmpDate.getDay() == 6) {
+        i++;
+      } else {
+        vacation.endDate = tmpDate
+        if (i >= 1) {
+          vacation.Dates.push(tmpDate);
+        } else {
+          // Deal with half day if possible
+          vacation.Dates.push(tmpDate);
+        }
+      }
+      tmpDate = new Date(tmpDate.getTime() + (24*3600*1000));
+    }
     vacation.Date = Utilities.formatDate(vacation.beginDate, 'GMT+8', 'yyyy-MM-dd') + " - " + Utilities.formatDate(vacation.endDate, 'GMT+8', 'yyyy-MM-dd');
   }
-
   return vacation;
 }
 
@@ -39,17 +64,9 @@ var addEventToCalendar = function(calendarID, vacation) {
     calendar.createAllDayEvent(vacation.user + " " + vacation.type, vacation.beginDate);
   }
   else {
-    var event = {
-      summary: vacation.user + " " + vacation.type,
-      start: {
-        date: Utilities.formatDate(vacation.beginDate, 'GMT+8', 'yyyy-MM-dd')
-      },
-      end: {
-        date: Utilities.formatDate(vacation.endDate, 'GMT+8', 'yyyy-MM-dd')
-      }
-    };
-
-    event = Calendar.Events.insert(event, calendarID);
+    for (var i=vacation.Dates.length - 1; i>=0; i--){
+      calendar.createAllDayEvent(vacation.user + " " + vacation.type, vacation.Dates[i]);
+    }
   }
 }
 
@@ -83,7 +100,7 @@ var sendEventToSlack = function(slackURL, slackChannel, vacation) {
              },
              {
                 "title": "日期 Vacation Date",
-               "value": vacation.Date + " (" + vacation.days + (vacation.days <= 1 ? " day" : " days)"),
+               "value": vacation.Date + " (" + vacation.days + (vacation.days <= 1 ? " day)" : " days)"),
                 "short": false
              }
           ]
@@ -105,12 +122,6 @@ function vacation() {
    * 1. add an event to calendar
    * 2. send a message to slack
    */
-
-  // the sheet for form data is called "data"
-  var sheetName = 'data';
-  var calendarID = '';
-  var slackURL = '';
-  var slackChannel = '#random';
 
   var data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
 
