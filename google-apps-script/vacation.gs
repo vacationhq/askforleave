@@ -1,3 +1,8 @@
+var sheetName = ''; // the sheet which is linked to your form submission.
+var calendarID = '';
+var slackURL = '';
+var slackChannel = '';
+
 var vacationDataParser = function(data, row) {
   var vacation = {
     row:        row,
@@ -105,12 +110,6 @@ function vacation() {
    * 1. add an event to calendar
    * 2. send a message to slack
    */
-
-  // the sheet for form data is called "data"
-  var sheetName = 'data';
-  var calendarID = '';
-  var slackURL = '';
-  var slackChannel = '#random';
 
   var data = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
 
