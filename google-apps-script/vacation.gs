@@ -11,11 +11,11 @@ var vacationDataParser = function(data, row) {
     Date:       ""
   };
   if (typeof vacation.days !== "number") {
-    return None;
+    return null;
   }
 
   if (vacation.days <= 0) {
-    return None;
+    return null;
   }
 
   if (vacation.days <= 1) {
