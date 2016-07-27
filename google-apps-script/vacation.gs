@@ -11,11 +11,11 @@ var vacationDataParser = function(data, row) {
     Date:       ""
   };
   if (typeof vacation.days !== "number") {
-    return None;
+    return null;
   }
 
   if (vacation.days <= 0) {
-    return None;
+    return null;
   }
 
   if (vacation.days <= 1) {
@@ -83,7 +83,7 @@ var sendEventToSlack = function(slackURL, slackChannel, vacation) {
              },
              {
                 "title": "日期 Vacation Date",
-               "value": vacation.Date + " (" + vacation.days + (vacation.days <= 1 ? " day" : " days)"),
+               "value": vacation.Date + " (" + vacation.days + (vacation.days <= 1 ? " day)" : " days)"),
                 "short": false
              }
           ]
